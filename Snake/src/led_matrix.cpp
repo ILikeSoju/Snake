@@ -1,5 +1,18 @@
 #include "led_matrix.h"
 
+LedMatrix ledMatrix;
+
+uint8_t coordinates[8][8] = {
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0},
+  {0,0,0,0,0,0,0,0}
+};
+
 void LedMatrix::init(){
     pinMode(LED_MATRIX_CS, OUTPUT);
     digitalWrite(LED_MATRIX_CS, HIGH);
@@ -24,12 +37,17 @@ void LedMatrix::sendData(uint8_t adress, uint8_t data){
     digitalWrite(LED_MATRIX_CS, HIGH);
 }
 
-void LedMatrix::update(uint8_t coordinates[8][8]){
+void LedMatrix::update(){
     for(uint8_t row = 0; row < 8; row++){
         uint8_t value = 0;
         for(uint8_t colum = 0; colum < 8; colum++){
-            if(coordinates[colum][row]) value |= (1 << (7 - colum));
+            if(coordinates[row][colum]) value |= (1 << (7 - colum));
         }
         sendData(row + 1, value);
     }
+}
+
+void LedMatrix::draw(uint8_t x, uint8_t y, bool add){
+    if(add) coordinates[y][x] = 1;
+    else coordinates[y][x] = 0;
 }

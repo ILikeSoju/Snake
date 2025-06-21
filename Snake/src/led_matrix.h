@@ -14,7 +14,8 @@ class LedMatrix{
         void sendData(uint8_t adress, uint8_t data);
     public:
         void init();
-        void update(uint8_t coordinates[8][8]);
+        void update();
+        void draw(uint8_t x, uint8_t y, bool add);
 };
 
 #endif
