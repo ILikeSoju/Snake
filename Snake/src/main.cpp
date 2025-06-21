@@ -1,24 +1,19 @@
 #include <Arduino.h>
 #include "led_matrix.h"
+#include "player.h"
 
-LedMatrix ledMatrix;
+extern LedMatrix ledMatrix;
+extern Player player;
 
-uint8_t coordinates[8][8] = {
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 1, 0, 0, 1, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0},
-  {1, 1, 0, 0, 0, 0, 1, 1}
-};
+uint8_t gameSpeed = 200;
 
 void setup(){
   ledMatrix.init();
-  ledMatrix.update(coordinates);
+  ledMatrix.update();
 }
 
 void loop(){
-
+  player.moveRight();
+  ledMatrix.update();
+  delay(gameSpeed);
 }
