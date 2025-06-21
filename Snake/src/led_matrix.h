@@ -10,10 +10,11 @@
 #define LED_MATRIX_CLK PB13
 
 class LedMatrix{
+    private:
+        void sendData(uint8_t adress, uint8_t data);
     public:
         void init();
-        void update();
-        void sendData(unsigned char adress, unsigned char data);
+        void update(uint8_t coordinates[8][8]);
 };
 
 #endif
