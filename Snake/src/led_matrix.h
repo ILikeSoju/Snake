@@ -16,6 +16,7 @@ class LedMatrix{
         void init();
         void update();
         void draw(uint8_t x, uint8_t y, bool add);
+        void clear();
 };
 
 #endif

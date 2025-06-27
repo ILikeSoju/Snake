@@ -51,3 +51,11 @@ void LedMatrix::draw(uint8_t x, uint8_t y, bool add){
     if(add) coordinates[y][x] = 1;
     else coordinates[y][x] = 0;
 }
+
+void LedMatrix::clear(){
+    for(uint8_t y = 0; y < 8; y++){
+        for(uint8_t x = 0; x < 8; x++){
+            coordinates[y][x] = 0;
+        }
+    }
+}
