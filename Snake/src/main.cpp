@@ -10,6 +10,8 @@ extern Apple apple;
 
 #define JOYSTICK_X PC0
 #define JOYSTICK_Y PC1
+#define RESTART PB4
+#define SNAKE_START_LENGTH 2
 
 LiquidCrystal_PCF8574 lcd(0x27);
 
@@ -18,18 +20,37 @@ direction current_direction;
 
 uint8_t gameSpeed = 200;
 
-int apples = 0;
+volatile int apples = 0;
+int highscore = 0;
+
+volatile bool LCDGameOver = false;
+
+void isr_restart(){
+  if(LCDGameOver) LCDGameOver = false;
+  apples = 0;
+  current_direction = RIGHT;
+  snake.setLength(SNAKE_START_LENGTH);
+  if(snake.isDead()) !snake.isDead();
+  ledMatrix.clear();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.printf("Snake by VAA");
+  delay(1000);
+}
 
 void setup(){
   analogReadResolution(6);
+  pinMode(RESTART, INPUT_PULLDOWN);
+  attachInterrupt(RESTART, isr_restart, RISING);
   lcd.begin(16,2);
   lcd.clear();
   lcd.setBacklight(255);
   lcd.setCursor(0,0);
-  lcd.printf("SNAKE: WONYOUNG");
+  lcd.printf("Snake by VAA");
 
   randomSeed(0);
 
+  snake.setLength(SNAKE_START_LENGTH);
   current_direction = RIGHT;
 
   ledMatrix.init();
@@ -67,18 +88,32 @@ void loop(){
   }
 
   Position head = snake.getPart(0);
-  Position object = apple.getPosition();
+  Position object_apple = apple.getPosition();
 
-  if(head.x == object.x && head.y == object.y){
+  if(head.x == object_apple.x && head.y == object_apple.y){
     snake.grow();
     apples++;
     apple.spawn();
   }
 
   if (snake.isDead()) {
+    if(highscore < apples) highscore = apples;
     lcd.clear();
+    if(!LCDGameOver){
+      LCDGameOver = true;
+      lcd.setCursor(0,0);
+      lcd.printf("GAME OVER");
+      lcd.setCursor(0,1);
+      lcd.printf("GAME OVER");
+      delay(1000);
+    }
     lcd.setCursor(0,0);
-    lcd.print("GAME OVER");
+    lcd.printf("Score: %d Best: %d, apples", apples, highscore);
+    lcd.setCursor(0, 1);
+    lcd.printf("PB4 -> Restart");
+  } else {
+    lcd.setCursor(0,1);
+    lcd.printf("Score: %d", apples);
   }
 
   ledMatrix.clear();
@@ -86,6 +121,5 @@ void loop(){
   apple.draw();
   ledMatrix.update();
   lcd.setCursor(0, 1);
-  lcd.printf("Score: %d", apples);
   delay(gameSpeed);
 }

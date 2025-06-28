@@ -3,11 +3,10 @@
 
 extern LedMatrix ledMatrix;
 
-#define MAX_LENGTH 6
+#define MAX_LENGTH 16
 
 Position snake[MAX_LENGTH];
 uint8_t length = 3;
-
 
 void Snake::init(){
     snake[0] = {4, 4};
@@ -37,11 +36,15 @@ uint8_t Snake::getLength(){
     return length;
 }
 
-Position Snake::getPart(uint8_t index) {
+void Snake::setLength(uint8_t newLength){
+    length = newLength;
+}
+
+Position Snake::getPart(uint8_t index){
     return snake[index];
 }
 
-bool Snake::isDead() {
+bool Snake::isDead(){
     Position head = snake[0];
     for(uint8_t i = 1; i < length; i++) {
         if (snake[i].x == head.x && snake[i].y == head.y) {

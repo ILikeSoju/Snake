@@ -11,6 +11,7 @@ class Snake{
         void draw();
         void grow();
         uint8_t getLength();
+        void setLength(uint8_t newLength);
         Position getPart(uint8_t index);
         bool isDead();
 };
