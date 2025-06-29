@@ -11,9 +11,17 @@ extern Apple apple;
 #define JOYSTICK_X PC0
 #define JOYSTICK_Y PC1
 #define RESTART PB4
+
+#define BTRX PB11
+#define BTTX PB10
+#define ENABLE PB12
+#define STATE PA1
+
 #define SNAKE_START_LENGTH 2
 
 LiquidCrystal_PCF8574 lcd(0x27);
+static HardwareTimer timer = HardwareTimer(TIM6);
+HardwareSerial SerialBT(BTRX,BTTX);
 
 enum direction {RIGHT, LEFT, UP, DOWN};
 direction current_direction;
@@ -38,27 +46,7 @@ void isr_restart(){
   delay(1000);
 }
 
-void setup(){
-  analogReadResolution(6);
-  pinMode(RESTART, INPUT_PULLDOWN);
-  attachInterrupt(RESTART, isr_restart, RISING);
-  lcd.begin(16,2);
-  lcd.clear();
-  lcd.setBacklight(255);
-  lcd.setCursor(0,0);
-  lcd.printf("Snake by VAA");
-
-  randomSeed(0);
-
-  snake.setLength(SNAKE_START_LENGTH);
-  current_direction = RIGHT;
-
-  ledMatrix.init();
-  snake.init();
-  apple.spawn();
-}
-
-void loop(){
+void isr_main(){
   switch (current_direction)
   {
   case RIGHT:
@@ -121,5 +109,52 @@ void loop(){
   apple.draw();
   ledMatrix.update();
   lcd.setCursor(0, 1);
-  delay(gameSpeed);
+}
+
+void setup(){
+  analogReadResolution(6);
+
+  timer.setPrescaleFactor(32000);
+  timer.setOverflow(300);
+  timer.attachInterrupt(isr_main);
+  timer.resume();
+
+  Serial.begin(9600);
+  SerialBT.begin(9600);
+  delay(100);
+  pinMode(STATE,INPUT);
+  Serial.println("Bluetooth erfolgreich verbunden");
+  
+
+  pinMode(RESTART, INPUT_PULLDOWN);
+  attachInterrupt(RESTART, isr_restart, RISING);
+  lcd.begin(16,2);
+  lcd.clear();
+  lcd.setBacklight(255);
+  lcd.setCursor(0,0);
+  lcd.printf("Snake by VAA");
+
+  randomSeed(0);
+
+  snake.setLength(SNAKE_START_LENGTH);
+  current_direction = RIGHT;
+
+  ledMatrix.init();
+  snake.init();
+  apple.spawn();
+}
+
+void loop(){
+  if (SerialBT.available()) {
+  String command = SerialBT.readStringUntil('\n');
+  command.trim();         // entfernt \n, \r und Leerzeichen
+  command.toUpperCase();  // "up" → "UP"
+  Serial.println(command);
+
+  if (command == "UP"    && (current_direction == RIGHT || current_direction == LEFT)) current_direction = UP;
+  if (command == "DOWN"  && (current_direction == RIGHT || current_direction == LEFT)) current_direction = DOWN;
+  if (command == "LEFT"  && (current_direction == UP || current_direction == DOWN))    current_direction = LEFT;
+  if (command == "RIGHT" && (current_direction == UP || current_direction == DOWN))    current_direction = RIGHT;
+  if (command == "RESTART") isr_restart();
+}
 }
