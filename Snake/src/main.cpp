@@ -10,7 +10,7 @@ extern Apple apple;
 
 #define JOYSTICK_X PC0
 #define JOYSTICK_Y PC1
-#define RESTART PB4
+#define RESTART PA6
 
 #define BTRX PB11
 #define BTTX PB10
@@ -42,7 +42,7 @@ void isr_restart(){
   ledMatrix.clear();
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.printf("Snake by VAA");
+  lcd.printf("Snake");
   delay(1000);
 }
 
@@ -98,7 +98,7 @@ void isr_main(){
     lcd.setCursor(0,0);
     lcd.printf("Score: %d Best: %d, apples", apples, highscore);
     lcd.setCursor(0, 1);
-    lcd.printf("PB4 -> Restart");
+    lcd.printf("PA6 -> Restart");
   } else {
     lcd.setCursor(0,1);
     lcd.printf("Score: %d", apples);
@@ -115,7 +115,7 @@ void setup(){
   analogReadResolution(6);
 
   timer.setPrescaleFactor(32000);
-  timer.setOverflow(300);
+  timer.setOverflow(200);
   timer.attachInterrupt(isr_main);
   timer.resume();
 
@@ -132,7 +132,7 @@ void setup(){
   lcd.clear();
   lcd.setBacklight(255);
   lcd.setCursor(0,0);
-  lcd.printf("Snake by VAA");
+  lcd.printf("Snake");
 
   randomSeed(0);
 
@@ -147,8 +147,8 @@ void setup(){
 void loop(){
   if (SerialBT.available()) {
   String command = SerialBT.readStringUntil('\n');
-  command.trim();         // entfernt \n, \r und Leerzeichen
-  command.toUpperCase();  // "up" → "UP"
+  command.trim();
+  command.toUpperCase();
   Serial.println(command);
 
   if (command == "UP"    && (current_direction == RIGHT || current_direction == LEFT)) current_direction = UP;
